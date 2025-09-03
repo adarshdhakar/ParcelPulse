@@ -44,6 +44,9 @@ app.use(cookieParser());
     res.status(200).json({key:process.env.RAZORPAY_API_KEY});
 })
 
+
+// app.use("/api/test", ()=>console.log("HI  sih ki ma ki ankh------------"));
+
 app.use("/api/user",userRoute);
 app.use("/api/auth",authRoute);
 app.use("/api/bus",bookingRoute);

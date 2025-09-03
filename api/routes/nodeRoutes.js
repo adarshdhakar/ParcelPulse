@@ -9,18 +9,6 @@ const router = express.Router();
  * @param {Object} req - The request object containing Node details
  * @param {Object} res - The response object
  */
-<<<<<<< Tabnine <<<<<<<
-/**//+
- * Route to create one or multiple nodes.//+
- *//+
- * @route POST /api/createNodes//+
- * @param {Object} req - The request object containing Node details.//+
- * @param {Object} res - The response object.//+
- *//+
- * @returns {Object} - An object containing a status code and a message or an array of created nodes.//+
- *//+
- * @throws {Error} - Throws an error if there is a server error.//+
- *///+
 router.post("/createNodes", async (req, res) => {
   try {
     const nodes = Array.isArray(req.body) ? req.body : [req.body]; // Check if body is an array, else make it an array with a single node
@@ -87,6 +75,75 @@ router.post("/createNodes", async (req, res) => {
     return res.status(500).json({ message: "Server error." });
   }
 });
->>>>>>> Tabnine >>>>>>>// {"conversationId":"d7e9d892-864d-4e7a-9462-2708e2b373bf","source":"instruct"}
+
+router.post("/addTransport", async (req, res) => {
+  console.log("Rec");
+  try {
+    const { selectedMode, name, transportationModes } = req.body;
+    console.log(req.body);
+    
+    // Validate input
+    if (!selectedMode || !name) {
+      return res.status(400).json({ 
+        message: "Mode and node name are required" 
+      });
+    }
+
+    // Find the existing node
+    const existingNode = await Node.findOne({ name });
+
+    // // If node doesn't exist, create a new one
+    // if (!existingNode) {
+    //   return res.status(404).json({ 
+    //     message: "Node not found" 
+    //   });
+    // }
+
+    // Prepare the new transportation mode entry
+    const newTransportEntry = {
+      number: transportationModes.number,
+      departureTime: transportationModes.departureTime,
+      arrivalTime: transportationModes.arrivalTime
+    };
+    console.log(newTransportEntry);
+
+    // Update the specific transportation mode array
+    switch(selectedMode.toLowerCase()) {
+      case 'train':
+        existingNode.transportationModes.train.push(newTransportEntry);
+        break;
+      case 'bus':
+        existingNode.transportationModes.bus.push(newTransportEntry);
+        break;
+      case 'ship':
+        existingNode.transportationModes.ship.push(newTransportEntry);
+        break;
+      case 'air':
+        existingNode.transportationModes.air.push(newTransportEntry);
+        break;
+      default:
+        return res.status(400).json({ 
+          message: "Invalid transportation mode" 
+        });
+    }
+
+    // Save the updated node
+    const updatedNode = await existingNode.save();
+    console.log(updatedNode);
+
+    // Respond with success and updated node
+    res.status(200).json({
+      message: "Transportation mode added successfully",
+      node: updatedNode
+    });
+
+  } catch (error) {
+    console.error("Error adding transport:", error);
+    res.status(500).json({ 
+      message: "Internal server error", 
+      error: error.message 
+    });
+  }
+});
 
 export default router;
